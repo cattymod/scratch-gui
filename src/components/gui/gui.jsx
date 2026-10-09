@@ -8,9 +8,16 @@ import MediaQuery from 'react-responsive';
 import {Tab, Tabs, TabList, TabPanel} from 'react-tabs';
 import tabStyles from 'react-tabs/style/react-tabs.css';
 import VM from 'scratch-vm';
+import {
+    Blocks as BlocksIcon,
+    PaintbrushVertical,
+    Volume2
+} from 'lucide-react';
+
 const hideSeeProjectPage =
     window.parent !== window &&
     window.location.hostname !== "studio.cattymod.app";
+
 import Blocks from '../../containers/blocks.jsx';
 import CostumeTab from '../../containers/costume-tab.jsx';
 import TargetPane from '../../containers/target-pane.jsx';
@@ -47,11 +54,7 @@ import {Theme} from '../../lib/themes';
 import {isRendererSupported, isBrowserSupported} from '../../lib/tw-environment-support-prober';
 
 import styles from './gui.css';
-import addExtensionIcon from './icon--extensions.svg';import {
-    Blocks as BlocksIcon,
-    PaintbrushVertical,
-    Volume2
-} from 'lucide-react';
+import addExtensionIcon from './icon--extensions.svg';
 
 const messages = defineMessages({
     addExtension: {
@@ -164,6 +167,7 @@ const GUIComponent = props => {
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
+
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
@@ -182,293 +186,306 @@ const GUIComponent = props => {
         FIXED_WIDTH +
         Math.max(0, customStageSize.width - FIXED_WIDTH)
     );
-    return (<MediaQuery minWidth={unconstrainedWidth}>{isUnconstrained => {
-        const stageSize = resolveStageSize(stageSizeMode, isUnconstrained);
 
-        const alwaysEnabledModals = (
-            <React.Fragment>
-                <TWSecurityManager securityManager={securityManager} />
-                <TWRestorePointManager />
-                {usernameModalVisible && <TWUsernameModal />}
-                {settingsModalVisible && <TWSettingsModal />}
-                {customExtensionModalVisible && <TWCustomExtensionModal />}
-                {fontsModalVisible && <TWFontsModal />}
-                {unknownPlatformModalVisible && <TWUnknownPlatformModal />}
-                {invalidProjectModalVisible && <TWInvalidProjectModal />}
-            </React.Fragment>
-        );
+    return (
+        <MediaQuery minWidth={unconstrainedWidth}>
+            {isUnconstrained => {
+                const stageSize = resolveStageSize(stageSizeMode, isUnconstrained);
 
-        return isPlayerOnly ? (
-            <React.Fragment>
-                {/* TW: When the window is fullscreen, use an element to display the background color */}
-                {/* The default color for transparency is inconsistent between browsers and there isn't an existing */}
-                {/* element for us to style that fills the entire screen. */}
-                {isWindowFullScreen ? (
-                    <div
-                        className={styles.fullscreenBackground}
+                const alwaysEnabledModals = (
+                    <React.Fragment>
+                        <TWSecurityManager securityManager={securityManager} />
+                        <TWRestorePointManager />
+                        {usernameModalVisible && <TWUsernameModal />}
+                        {settingsModalVisible && <TWSettingsModal />}
+                        {customExtensionModalVisible && <TWCustomExtensionModal />}
+                        {fontsModalVisible && <TWFontsModal />}
+                        {unknownPlatformModalVisible && <TWUnknownPlatformModal />}
+                        {invalidProjectModalVisible && <TWInvalidProjectModal />}
+                    </React.Fragment>
+                );
+
+                return isPlayerOnly ? (
+                    <React.Fragment>
+                        {isWindowFullScreen ? (
+                            <div
+                                className={styles.fullscreenBackground}
+                                style={{
+                                    backgroundColor: fullscreenBackgroundColor
+                                }}
+                            />
+                        ) : null}
+
+                        <StageWrapper
+                            isFullScreen={isFullScreen}
+                            isEmbedded={isEmbedded}
+                            isRendererSupported={isRendererSupported()}
+                            isRtl={isRtl}
+                            loading={loading}
+                            stageSize={STAGE_SIZE_MODES.full}
+                            vm={vm}
+                        >
+                            {alertsVisible ? (
+                                <Alerts className={styles.alertsContainer} />
+                            ) : null}
+                        </StageWrapper>
+
+                        {alwaysEnabledModals}
+                    </React.Fragment>
+                ) : (
+                    <Box
+                        className={styles.pageWrapper}
+                        dir={isRtl ? 'rtl' : 'ltr'}
                         style={{
-                            backgroundColor: fullscreenBackgroundColor
+                            minWidth: 1024 + Math.max(0, customStageSize.width - 480),
+                            minHeight: 640 + Math.max(0, customStageSize.height - 360)
                         }}
-                    />
-                ) : null}
-                <StageWrapper
-                    isFullScreen={isFullScreen}
-                    isEmbedded={isEmbedded}
-                    isRendererSupported={isRendererSupported()}
-                    isRtl={isRtl}
-                    loading={loading}
-                    stageSize={STAGE_SIZE_MODES.full}
-                    vm={vm}
-                >
-                    {alertsVisible ? (
-                        <Alerts className={styles.alertsContainer} />
-                    ) : null}
-                </StageWrapper>
-                {alwaysEnabledModals}
-            </React.Fragment>
-        ) : (
-            <Box
-                className={styles.pageWrapper}
-                dir={isRtl ? 'rtl' : 'ltr'}
-                style={{
-                    minWidth: 1024 + Math.max(0, customStageSize.width - 480),
-                    minHeight: 640 + Math.max(0, customStageSize.height - 360)
-                }}
-                {...componentProps}
-            >
-                {alwaysEnabledModals}
-                {telemetryModalVisible ? (
-                    <TelemetryModal
-                        isRtl={isRtl}
-                        isTelemetryEnabled={isTelemetryEnabled}
-                        onCancel={onTelemetryModalCancel}
-                        onOptIn={onTelemetryModalOptIn}
-                        onOptOut={onTelemetryModalOptOut}
-                        onRequestClose={onRequestCloseTelemetryModal}
-                        onShowPrivacyPolicy={onShowPrivacyPolicy}
-                    />
-                ) : null}
-                {loading ? (
-                    <Loader isFullScreen />
-                ) : null}
-                {isCreating ? (
-                    <Loader
-                        isFullScreen
-                        messageId="gui.loader.creating"
-                    />
-                ) : null}
-                {isBrowserSupported() ? null : (
-                    <BrowserModal
-                        isRtl={isRtl}
-                        onClickDesktopSettings={onClickDesktopSettings}
-                    />
-                )}
-                {tipsLibraryVisible ? (
-                    <TipsLibrary />
-                ) : null}
-                {cardsVisible ? (
-                    <Cards />
-                ) : null}
-                {alertsVisible ? (
-                    <Alerts className={styles.alertsContainer} />
-                ) : null}
-                {connectionModalVisible ? (
-                    <ConnectionModal
-                        vm={vm}
-                    />
-                ) : null}
-                {costumeLibraryVisible ? (
-                    <CostumeLibrary
-                        vm={vm}
-                        onRequestClose={onRequestCloseCostumeLibrary}
-                    />
-                ) : null}
-                {backdropLibraryVisible ? (
-                    <BackdropLibrary
-                        vm={vm}
-                        onRequestClose={onRequestCloseBackdropLibrary}
-                    />
-                ) : null}
-                <MenuBar
-                    accountNavOpen={accountNavOpen}
-                    authorId={authorId}
-                    authorThumbnailUrl={authorThumbnailUrl}
-                    authorUsername={authorUsername}
-                    canChangeLanguage={canChangeLanguage}
-                    canChangeTheme={canChangeTheme}
-                    canCreateCopy={canCreateCopy}
-                    canCreateNew={canCreateNew}
-                    canEditTitle={canEditTitle}
-                    canManageFiles={canManageFiles}
-                    canRemix={canRemix}
-                    canSave={canSave}
-                    canShare={canShare}
-                    className={styles.menuBarPosition}
-                    enableCommunity={enableCommunity}
-                    isShared={isShared}
-                    isTotallyNormal={isTotallyNormal}
-                    logo={logo}
-                    renderLogin={renderLogin}
-                    showComingSoon={showComingSoon}
-                    showOpenFilePicker={showOpenFilePicker}
-                    showSaveFilePicker={showSaveFilePicker}
-                    onClickAbout={onClickAbout}
-                    onClickAccountNav={onClickAccountNav}
-                    onClickAddonSettings={onClickAddonSettings}
-                    onClickDesktopSettings={onClickDesktopSettings}
-                    onClickNewWindow={onClickNewWindow}
-                    onClickPackager={onClickPackager}
-                    onClickLogo={onClickLogo}
-                    onCloseAccountNav={onCloseAccountNav}
-                    onLogOut={onLogOut}
-                    onOpenRegistration={onOpenRegistration}
-                    onProjectTelemetryEvent={onProjectTelemetryEvent}
-                    onSeeCommunity={hideSeeProjectPage ? null : onSeeCommunity}
-                    onShare={onShare}
-                    onStartSelectingFileUpload={onStartSelectingFileUpload}
-                    onToggleLoginOpen={onToggleLoginOpen}
-                />
-                <Box className={styles.bodyWrapper}>
-                    <Box className={styles.flexWrapper}>
-                        <Box className={styles.editorWrapper}>
-                            <Tabs
-                                forceRenderTabPanel
-                                className={tabClassNames.tabs}
-                                selectedIndex={activeTabIndex}
-                                selectedTabClassName={tabClassNames.tabSelected}
-                                selectedTabPanelClassName={tabClassNames.tabPanelSelected}
-                                onSelect={onActivateTab}
-                            >
-                                <TabList className={tabClassNames.tabList}>
-    <Tab className={tabClassNames.tab}>
-        <BlocksIcon
-            size={24}
-            strokeWidth={2}
-            className={styles.tabIcon}
-        />
-        <FormattedMessage
-            defaultMessage="Code"
-            description="Button to get to the code panel"
-            id="gui.gui.codeTab"
-        />
-    </Tab>
+                        {...componentProps}
+                    >
+                        {alwaysEnabledModals}
 
-    <Tab
-        className={tabClassNames.tab}
-        onClick={onActivateCostumesTab}
-    >
-        <PaintbrushVertical
-            size={24}
-            strokeWidth={2}
-            className={styles.tabIcon}
-        />
-        {targetIsStage ? (
-            <FormattedMessage
-                defaultMessage="Backdrops"
-                description="Button to get to the backdrops panel"
-                id="gui.gui.backdropsTab"
-            />
-        ) : (
-            <FormattedMessage
-                defaultMessage="Costumes"
-                description="Button to get to the costumes panel"
-                id="gui.gui.costumesTab"
-            />
-        )}
-    </Tab>
+                        {telemetryModalVisible ? (
+                            <TelemetryModal
+                                isRtl={isRtl}
+                                isTelemetryEnabled={isTelemetryEnabled}
+                                onCancel={onTelemetryModalCancel}
+                                onOptIn={onTelemetryModalOptIn}
+                                onOptOut={onTelemetryModalOptOut}
+                                onRequestClose={onRequestCloseTelemetryModal}
+                                onShowPrivacyPolicy={onShowPrivacyPolicy}
+                            />
+                        ) : null}
 
-    <Tab
-        className={tabClassNames.tab}
-        onClick={onActivateSoundsTab}
-    >
-        <Volume2
-            size={24}
-            strokeWidth={2}
-            className={styles.tabIcon}
-        />
-        <FormattedMessage
-            defaultMessage="Sounds"
-            description="Button to get to the sounds panel"
-            id="gui.gui.soundsTab"
-        />
-    </Tab>
-</TabList>
-                                <TabPanel className={tabClassNames.tabPanel}>
-                                    <Box className={styles.blocksWrapper}>
-                                        <Blocks
-                                            key={`${blocksId}/${theme.id}`}
-                                            canUseCloud={canUseCloud}
-                                            grow={1}
-                                            isVisible={blocksTabVisible}
-                                            options={{
-                                                media: `${basePath}static/${theme.getBlocksMediaFolder()}/`
-                                            }}
+                        {loading ? <Loader isFullScreen /> : null}
+
+                        {isCreating ? (
+                            <Loader
+                                isFullScreen
+                                messageId="gui.loader.creating"
+                            />
+                        ) : null}
+
+                        {isBrowserSupported() ? null : (
+                            <BrowserModal
+                                isRtl={isRtl}
+                                onClickDesktopSettings={onClickDesktopSettings}
+                            />
+                        )}
+
+                        {tipsLibraryVisible ? <TipsLibrary /> : null}
+                        {cardsVisible ? <Cards /> : null}
+
+                        {alertsVisible ? (
+                            <Alerts className={styles.alertsContainer} />
+                        ) : null}
+
+                        {connectionModalVisible ? <ConnectionModal vm={vm} /> : null}
+
+                        {costumeLibraryVisible ? (
+                            <CostumeLibrary
+                                vm={vm}
+                                onRequestClose={onRequestCloseCostumeLibrary}
+                            />
+                        ) : null}
+
+                        {backdropLibraryVisible ? (
+                            <BackdropLibrary
+                                vm={vm}
+                                onRequestClose={onRequestCloseBackdropLibrary}
+                            />
+                        ) : null}
+
+                        <MenuBar
+                            accountNavOpen={accountNavOpen}
+                            authorId={authorId}
+                            authorThumbnailUrl={authorThumbnailUrl}
+                            authorUsername={authorUsername}
+                            canChangeLanguage={canChangeLanguage}
+                            canChangeTheme={canChangeTheme}
+                            canCreateCopy={canCreateCopy}
+                            canCreateNew={canCreateNew}
+                            canEditTitle={canEditTitle}
+                            canManageFiles={canManageFiles}
+                            canRemix={canRemix}
+                            canSave={canSave}
+                            canShare={canShare}
+                            className={styles.menuBarPosition}
+                            enableCommunity={enableCommunity}
+                            isShared={isShared}
+                            isTotallyNormal={isTotallyNormal}
+                            logo={logo}
+                            renderLogin={renderLogin}
+                            showComingSoon={showComingSoon}
+                            showOpenFilePicker={showOpenFilePicker}
+                            showSaveFilePicker={showSaveFilePicker}
+                            onClickAbout={onClickAbout}
+                            onClickAccountNav={onClickAccountNav}
+                            onClickAddonSettings={onClickAddonSettings}
+                            onClickDesktopSettings={onClickDesktopSettings}
+                            onClickNewWindow={onClickNewWindow}
+                            onClickPackager={onClickPackager}
+                            onClickLogo={onClickLogo}
+                            onCloseAccountNav={onCloseAccountNav}
+                            onLogOut={onLogOut}
+                            onOpenRegistration={onOpenRegistration}
+                            onProjectTelemetryEvent={onProjectTelemetryEvent}
+                            onSeeCommunity={hideSeeProjectPage ? null : onSeeCommunity}
+                            onShare={onShare}
+                            onStartSelectingFileUpload={onStartSelectingFileUpload}
+                            onToggleLoginOpen={onToggleLoginOpen}
+                        />
+
+                        <Box className={styles.bodyWrapper}>
+                            <Box className={styles.flexWrapper}>
+                                <Box className={styles.editorWrapper}>
+                                    <Tabs
+                                        forceRenderTabPanel
+                                        className={tabClassNames.tabs}
+                                        selectedIndex={activeTabIndex}
+                                        selectedTabClassName={tabClassNames.tabSelected}
+                                        selectedTabPanelClassName={tabClassNames.tabPanelSelected}
+                                        onSelect={onActivateTab}
+                                    >
+                                        <TabList className={tabClassNames.tabList}>
+                                            <Tab className={tabClassNames.tab}>
+                                                <BlocksIcon
+                                                    size={24}
+                                                    strokeWidth={2}
+                                                    className={styles.tabIcon}
+                                                />
+                                                <FormattedMessage
+                                                    defaultMessage="Code"
+                                                    description="Button to get to the code panel"
+                                                    id="gui.gui.codeTab"
+                                                />
+                                            </Tab>
+
+                                            <Tab
+                                                className={tabClassNames.tab}
+                                                onClick={onActivateCostumesTab}
+                                            >
+                                                <PaintbrushVertical
+                                                    size={24}
+                                                    strokeWidth={2}
+                                                    className={styles.tabIcon}
+                                                />
+                                                {targetIsStage ? (
+                                                    <FormattedMessage
+                                                        defaultMessage="Backdrops"
+                                                        description="Button to get to the backdrops panel"
+                                                        id="gui.gui.backdropsTab"
+                                                    />
+                                                ) : (
+                                                    <FormattedMessage
+                                                        defaultMessage="Costumes"
+                                                        description="Button to get to the costumes panel"
+                                                        id="gui.gui.costumesTab"
+                                                    />
+                                                )}
+                                            </Tab>
+
+                                            <Tab
+                                                className={tabClassNames.tab}
+                                                onClick={onActivateSoundsTab}
+                                            >
+                                                <Volume2
+                                                    size={24}
+                                                    strokeWidth={2}
+                                                    className={styles.tabIcon}
+                                                />
+                                                <FormattedMessage
+                                                    defaultMessage="Sounds"
+                                                    description="Button to get to the sounds panel"
+                                                    id="gui.gui.soundsTab"
+                                                />
+                                            </Tab>
+                                        </TabList>
+
+                                        <TabPanel className={tabClassNames.tabPanel}>
+                                            <Box className={styles.blocksWrapper}>
+                                                <Blocks
+                                                    key={`${blocksId}/${theme.id}`}
+                                                    canUseCloud={canUseCloud}
+                                                    grow={1}
+                                                    isVisible={blocksTabVisible}
+                                                    options={{
+                                                        media: `${basePath}static/${theme.getBlocksMediaFolder()}/`
+                                                    }}
+                                                    stageSize={stageSize}
+                                                    onOpenCustomExtensionModal={onOpenCustomExtensionModal}
+                                                    theme={theme}
+                                                    vm={vm}
+                                                />
+                                            </Box>
+
+                                            <Box className={styles.extensionButtonContainer}>
+                                                <button
+                                                    className={styles.extensionButton}
+                                                    title={intl.formatMessage(messages.addExtension)}
+                                                    onClick={onExtensionButtonClick}
+                                                >
+                                                    <img
+                                                        className={styles.extensionButtonIcon}
+                                                        draggable={false}
+                                                        src={addExtensionIcon}
+                                                    />
+                                                </button>
+                                            </Box>
+
+                                            <Box className={styles.watermark}>
+                                                <Watermark />
+                                            </Box>
+                                        </TabPanel>
+
+                                        <TabPanel className={tabClassNames.tabPanel}>
+                                            {costumesTabVisible ? (
+                                                <CostumeTab vm={vm} />
+                                            ) : null}
+                                        </TabPanel>
+
+                                        <TabPanel className={tabClassNames.tabPanel}>
+                                            {soundsTabVisible ? <SoundTab vm={vm} /> : null}
+                                        </TabPanel>
+                                    </Tabs>
+
+                                    {backpackVisible ? (
+                                        <Backpack host={backpackHost} />
+                                    ) : null}
+                                </Box>
+
+                                <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
+                                    <StageWrapper
+                                        isFullScreen={isFullScreen}
+                                        isRendererSupported={isRendererSupported()}
+                                        isRtl={isRtl}
+                                        stageSize={stageSize}
+                                        vm={vm}
+                                    />
+
+                                    <Box className={styles.targetWrapper}>
+                                        <TargetPane
                                             stageSize={stageSize}
-                                            onOpenCustomExtensionModal={onOpenCustomExtensionModal}
-                                            theme={theme}
                                             vm={vm}
                                         />
                                     </Box>
-                                    <Box className={styles.extensionButtonContainer}>
-                                        <button
-                                            className={styles.extensionButton}
-                                            title={intl.formatMessage(messages.addExtension)}
-                                            onClick={onExtensionButtonClick}
-                                        >
-                                            <img
-                                                className={styles.extensionButtonIcon}
-                                                draggable={false}
-                                                src={addExtensionIcon}
-                                            />
-                                        </button>
-                                    </Box>
-                                    <Box className={styles.watermark}>
-                                        <Watermark />
-                                    </Box>
-                                </TabPanel>
-                                <TabPanel className={tabClassNames.tabPanel}>
-                                    {costumesTabVisible ? <CostumeTab
-                                        vm={vm}
-                                    /> : null}
-                                </TabPanel>
-                                <TabPanel className={tabClassNames.tabPanel}>
-                                    {soundsTabVisible ? <SoundTab vm={vm} /> : null}
-                                </TabPanel>
-                            </Tabs>
-                            {backpackVisible ? (
-                                <Backpack host={backpackHost} />
-                            ) : null}
-                        </Box>
-
-                        <Box className={classNames(styles.stageAndTargetWrapper, styles[stageSize])}>
-                            <StageWrapper
-                                isFullScreen={isFullScreen}
-                                isRendererSupported={isRendererSupported()}
-                                isRtl={isRtl}
-                                stageSize={stageSize}
-                                vm={vm}
-                            />
-                            <Box className={styles.targetWrapper}>
-                                <TargetPane
-                                    stageSize={stageSize}
-                                    vm={vm}
-                                />
+                                </Box>
                             </Box>
                         </Box>
+
+                        <DragLayer />
                     </Box>
-                </Box>
-                <DragLayer />
-            </Box>
-        );
-    }}</MediaQuery>);
+                );
+            }}
+        </MediaQuery>
+    );
 };
 
 GUIComponent.propTypes = {
     accountNavOpen: PropTypes.bool,
     activeTabIndex: PropTypes.number,
-    authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
+    authorId: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
     authorThumbnailUrl: PropTypes.string,
-    authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]), // can be false
+    authorUsername: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
     backdropLibraryVisible: PropTypes.bool,
     backpackHost: PropTypes.string,
     backpackVisible: PropTypes.bool,
@@ -550,6 +567,7 @@ GUIComponent.propTypes = {
     invalidProjectModalVisible: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
+
 GUIComponent.defaultProps = {
     backpackHost: null,
     backpackVisible: false,
@@ -577,7 +595,6 @@ GUIComponent.defaultProps = {
 const mapStateToProps = state => ({
     customStageSize: state.scratchGui.customStageSize,
     isWindowFullScreen: state.scratchGui.tw.isWindowFullScreen,
-    // This is the button's mode, as opposed to the actual current state
     blocksId: state.scratchGui.timeTravel.year.toString(),
     stageSizeMode: state.scratchGui.stageSize.stageSize,
     theme: state.scratchGui.theme.theme
