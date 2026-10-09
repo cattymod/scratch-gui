@@ -22,8 +22,8 @@ jobs:
           node-version: 20
 
       - name: Generate package-lock.json
-        run: npm install --package-lock-only --ignore-scripts
-
+        run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
+        
       - name: Commit and push lockfile
         run: |
           git config user.name "github-actions[bot]"
