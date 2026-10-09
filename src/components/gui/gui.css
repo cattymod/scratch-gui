@@ -151,12 +151,13 @@
     filter: grayscale(100%);
 }
 
+/* Increased spacing between each icon and its text */
 [dir="ltr"] .tab img {
-    margin-right: 0.125rem;
+    margin-right: 0.5rem;
 }
 
 [dir="rtl"] .tab img {
-    margin-left: 0.125rem;
+    margin-left: 0.5rem;
 }
 
 /* mirror blocks and sound tab icons */
