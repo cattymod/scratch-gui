@@ -353,7 +353,7 @@ $fade-out-distance: 15px;
 }
 
 .tabIcon {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
 }
