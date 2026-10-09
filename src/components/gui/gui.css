@@ -351,3 +351,9 @@ $fade-out-distance: 15px;
     /* overridden by JS; this will be used if the browser can't understand that color */
     background-color: white;
 }
+
+.tabIcon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
