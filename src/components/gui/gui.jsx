@@ -349,7 +349,7 @@ const GUIComponent = props => {
                                         <TabList className={tabClassNames.tabList}>
                                             <Tab className={tabClassNames.tab}>
                                                 <BlocksIcon
-                                                    size={16}
+                                                    size={24}
                                                     strokeWidth={2}
                                                     className={styles.tabIcon}
                                                 />
@@ -365,7 +365,7 @@ const GUIComponent = props => {
                                                 onClick={onActivateCostumesTab}
                                             >
                                                 <PaintbrushVertical
-                                                    size={16}
+                                                    size={24}
                                                     strokeWidth={2}
                                                     className={styles.tabIcon}
                                                 />
@@ -389,7 +389,7 @@ const GUIComponent = props => {
                                                 onClick={onActivateSoundsTab}
                                             >
                                                 <Volume2
-                                                    size={16}
+                                                    size={24}
                                                     strokeWidth={2}
                                                     className={styles.tabIcon}
                                                 />
