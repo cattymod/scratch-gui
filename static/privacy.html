@@ -15,9 +15,15 @@
     --border: #e5e7eb;
 }
 
-        <main>
-            <!-- UPDATE THIS WHEN MAKING CONTENT CHANGES -->
-            <p><i>Updated November 28, 2026</i></p>
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --text: #f9fafb;
+        --muted: #9ca3af;
+        --border: #374151;
+    }
+}
 
 * {
     box-sizing: border-box;
@@ -70,9 +76,16 @@ section {
     margin-top: 32px;
 }
 
-            <h2>TurboWarp Packager</h2>
-            <p>The <a href="https://packager.turbowarp.org/">TurboWarp Packager</a> may store settings and cache large downloads such as Electron in your browser for convenience and performance.</p>
-            <p>When packaging a project using custom extensions, the packager may access those websites to download the extensions.</p>
+h2 {
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+p,
+li {
+    color: var(--text);
+}
 
 ul {
     padding-left: 22px;
